@@ -40,7 +40,7 @@ function HomeForm() {
         setLoading(true);
         try {
             const response = await axios.get(
-                `http://localhost:3000/shops/shopDetail/${shopNumber}`
+                `https://e-chalan-download-service.onrender.com/shops/shopDetail/${shopNumber}`
             );
             console.log("response data are :: ",response.data);
             // console.log("block data are ::: ", blockData[0])

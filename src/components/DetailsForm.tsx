@@ -24,7 +24,7 @@ const DetailsForm = () => {
 
   const getProductDetails = async () => {
       const response = await axios.get(
-          `http://localhost:3000/products/productDetails`
+          `https://e-chalan-download-service.onrender.com/products/productDetails`
       );
       setProductDetails(response.data);
       setLoading(true);
