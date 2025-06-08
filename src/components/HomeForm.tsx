@@ -1,4 +1,4 @@
-import { useState} from "react";
+import {useEffect, useState} from "react";
 import {
     Box,
     Button,
@@ -12,30 +12,51 @@ import {
     Typography
 } from "@mui/material";
 import {useNavigate} from "react-router-dom";
-import {useFormData} from "../context/FormDataContext.tsx";
+import {shopDetails, useFormData} from "../context/FormDataContext.tsx";
 import axios from "axios";
+import {blockDataValue} from "../utils/blockData.ts";
 
 
 function HomeForm() {
 
     const navigate = useNavigate();
-
-    const [shopDetails, setShopDetails] = useState({});
+    const { updateFormData, updateShopDetails } = useFormData();
+    const [shopDetails, setShopDetails] = useState<shopDetails>({} as shopDetails);
     const [loading, setLoading] = useState(false);
     const [submitEnabled, setSubmitEnabled] = useState(true);
+    const [formData, setFormData] = useState({
+        yojna: "NFSA(Wheat&Rice)",
+        vitteeyVarsh: "2025-26",
+        aavtanMaah: "may",
+        dukaanSankhya: "",
+        captcha: "",
+    });
+
+    useEffect(() => {
+        console.log("form Data are ::: ", formData, " ::::: shop details are :::: ", shopDetails)
+    }, [formData, shopDetails]);
 
     const getShopDetails = async (shopNumber) => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `https://e-chalan-download-service-production.up.railway.app/shops/shopDetail/${shopNumber}`
+                `http://localhost:3000/shops/shopDetail/${shopNumber}`
             );
             console.log("response data are :: ",response.data);
-            setShopDetails(response.data);
+            // console.log("block data are ::: ", blockData[0])
+            const tempShopDetailsValue: shopDetails =  {
+                block: response.data.block,
+                cardType: response.data.cardType,
+                district: response.data.district,
+                gramPanchayat: response.data.gramPanchayat,
+                quantity: response.data.cardCount,
+                shopNumber: response.data.shopNumber,
+                shopOwnerName: response.data.shopkeeperName
+            };
+            setShopDetails(tempShopDetailsValue);
             setSubmitEnabled(false);
             setFormData((prev) => ({
                 ...prev,
-                ["quantity"]: Number(response.data.cardCount),
             }));
         } catch (error) {
             console.error("Error fetching shop details:", error);
@@ -45,16 +66,9 @@ function HomeForm() {
         }
     };
 
-    const { updateFormData } = useFormData();
 
-    const [formData, setFormData] = useState({
-        yojna: "NFSA(Wheat&Rice)",
-        vitteeyVarsh: "2025-26",
-        aavtanMaah: "मई",
-        dukaanSankhya: "",
-        captcha: "",
-        quantity: 0
-    });
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -70,6 +84,7 @@ function HomeForm() {
         console.log("Submitted Form Data:", JSON.stringify(formData, null, 2));
 
         updateFormData(formData);
+        updateShopDetails(shopDetails);
 
         navigate('/details')
         // Optionally, you could perform other actions here
@@ -77,6 +92,7 @@ function HomeForm() {
   return (
       <>
           <Box
+              id={"homeFormComp"}
               component="form"
               onSubmit={handleSubmit}
               sx={{
@@ -134,8 +150,18 @@ function HomeForm() {
                               label="आवंटन माह"
                               onChange={handleChange}
                           >
-                              <MenuItem value="मई">मई</MenuItem>
-                              <MenuItem value="जून">जून</MenuItem>
+                              <MenuItem value="may">मई</MenuItem>
+                              <MenuItem value="june">जून</MenuItem>
+                              <MenuItem value="july">जुलाई</MenuItem>
+                              <MenuItem value="augus">अगस्त</MenuItem>
+                              <MenuItem value="september">सितंबर</MenuItem>
+                              <MenuItem value="october">अक्टूबर</MenuItem>
+                              <MenuItem value="november">नवम्बर</MenuItem>
+                              <MenuItem value="december">दिसम्बर</MenuItem>
+                              <MenuItem value="january">जनवरी</MenuItem>
+                              <MenuItem value="ferbuary">फरवरी</MenuItem>
+                              <MenuItem value="march">मार्च</MenuItem>
+                              <MenuItem value="april">अप्रैल</MenuItem>
                           </Select>
                       </FormControl>
                   </Grid>
@@ -153,13 +179,14 @@ function HomeForm() {
                   <Grid item xs={12}>
                       <Button
                           onClick={()=>{
-                                    getShopDetails("20551107").then(r => console.log(r));
+                              console.log("dukaan shankya ::: ", formData.dukaanSankhya)
+                                    getShopDetails(formData.dukaanSankhya).then(r => console.log(r));
                           }}
                           type="button"
                           variant="contained"
                           color="error"
                           fullWidth
-                          sx={{ mt: 2 }}
+                          sx={{ mt: 2, backgroundColor: "#28a745", }}
                       >
                           Get Shop Details
                       </Button>
@@ -167,12 +194,15 @@ function HomeForm() {
 
                   <Grid item xs={12}>
                       <Button
-                          disabled={submitEnabled}
+                          sx={{
+                              backgroundColor: "#28a745",
+                              mt: 2
+                          }}
+                          // disabled={submitEnabled}
                           type="submit"
                           variant="contained"
                           color="error"
                           fullWidth
-                          sx={{ mt: 2 }}
                       >
                           चालान हेतु प्राप्त करें
                       </Button>
@@ -206,7 +236,7 @@ function HomeForm() {
                                   { key: "district", label: "District" },
                                   { key: "block", label: "Block" },
                                   { key: "gramPanchayat", label: "Gram Panchayat" },
-                                  { key: "shopkeeperName", label: "Shopkeeper Name" },
+                                  { key: "shopOwnerName", label: "Shopkeeper Name" },
                                   { key: "shopNumber", label: "Shop Number" },
                                   { key: "cardType", label: "Card Type" },
                                   { key: "cardCount", label: "Card Count" },

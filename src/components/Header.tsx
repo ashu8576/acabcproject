@@ -1,85 +1,80 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
-import LoginModal from './LoginModal';
-import { useAuth } from '../context/AuthContext';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  IconButton,
+  Button,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const Header = () => {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const headerStyles = {
-    background: '#fff',
-    padding: '16px 24px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-  };
-
-  const containerStyles = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  };
-
-  const titleStyles = {
-    fontSize: '24px',
-    fontWeight: 600,
-    color: '#2563eb',
-    margin: 0,
-  };
-
-  const buttonStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    backgroundColor: '#2563eb',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: 500,
-    transition: 'background-color 0.2s',
-  };
-
-  const handleLoginClick = () => {
-    setIsLoginModalOpen(true);
-  };
-
-  const handleLogoutClick = () => {
-    logout();
-    navigate('/');
-  };
-
-  const handleSuccessfulLogin = () => {
-    setIsLoginModalOpen(false);
-    navigate('/product-details');
-  };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <header style={headerStyles}>
-      <div style={containerStyles}>
-        <h1 style={titleStyles}>FormFlow</h1>
-        
-        <button
-          onClick={isAuthenticated ? handleLogoutClick : handleLoginClick}
-          style={buttonStyles}
-        >
-          <LogIn size={16} />
-          {isAuthenticated ? 'Logout' : 'Login'}
-        </button>
-      </div>
-
-      {isLoginModalOpen && (
-        <LoginModal 
-          isOpen={isLoginModalOpen} 
-          onClose={() => setIsLoginModalOpen(false)} 
-          onSuccess={handleSuccessfulLogin}
+      <Box sx={{ position: 'relative', height: { xs: '100vh', md: '70vh' }, overflow: 'hidden' }}>
+        {/* Background Image */}
+        <Box
+            component="img"
+            src="https://html.design/demo/agropro/images/banner.jpg"
+            alt="Farm Background"
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+            }}
         />
-      )}
-    </header>
+
+        {/* Overlay */}
+        <AppBar position="absolute" sx={{ background: 'transparent', boxShadow: 'none' }}>
+          <Toolbar sx={{ justifyContent: 'space-between' }}>
+            <Typography variant="h6" sx={{ color: '#788a0d', fontWeight: 'bold' }}>
+              AGROPRO
+            </Typography>
+
+            {isMobile ? (
+                <IconButton>
+                  <MenuIcon/>
+                </IconButton>
+            ) : (
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  {['Home', 'Service', 'Contact'].map((item) => (
+                      <Button
+                          onClick={()=>{
+                              if(item === "Service") {
+                                  const formElement = document.getElementById('homeFormComp');
+                                  if (formElement) {
+                                      formElement.scrollIntoView({behavior: 'smooth'});
+                                  }
+                              }
+                              if(item === "Contact") {
+                                  const formElement = document.getElementById('footerContactUs');
+                                  if (formElement) {
+                                      formElement.scrollIntoView({behavior: 'smooth'});
+                                  }
+                              }
+                          }}
+                          key={item}
+                          sx={{ color: item === 'Home' ? '#788a0d' : '#000', fontWeight: item === 'Home' ? 'bold' : 'normal' }}
+                      >
+                        {item}
+                      </Button>
+                  ))}
+                  <Button sx={{ color: '#788a0d', fontWeight: 'bold' }}>LOGIN</Button>
+                  <IconButton>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="#000" width="20" height="20" viewBox="0 0 24 24">
+                      <path d="M15.5,14h-.79l-.28-.27A6.471,6.471,0,0,0,16,9.5,6.5,6.5,0,1,0,9.5,16a6.471,6.471,0,0,0,4.23-1.57l.27.28v.79l5,4.99L20.49,19ZM9.5,14A4.5,4.5,0,1,1,14,9.5,4.5,4.5,0,0,1,9.5,14Z" />
+                    </svg>
+                  </IconButton>
+                </Box>
+            )}
+          </Toolbar>
+        </AppBar>
+      </Box>
   );
 };
 
